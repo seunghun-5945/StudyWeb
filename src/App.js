@@ -123,7 +123,6 @@ const App = () => {
       <audio autoPlay loop id="backgroundMusic">
         <source src={backgroundMusic} type="audio/mp3" />
       </audio>
-      <Title>"Enter 키를 누르면 정답, Shift + Enter 키를 누르면 패스"</Title>
       <QuestionArea>{sogong[currentIndex].question}</QuestionArea>
       <AnswerBox
         placeholder="정답을 입력하세요"
