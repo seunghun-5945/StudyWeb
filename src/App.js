@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import sogong from "../src/jsons/sogong.json";
+import backgroundMusic from "../src/music/music.mp3"; // 배경음 파일 경로
 
 const Container = styled.div`
   width: 100%;
@@ -10,13 +11,16 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   background-color: lightgray;
-  h1 {
-    font-size: 50px;
-  }
+`;
+
+const Title = styled.h1`
+  font-size: 50px;
+  color: red;
 `;
 
 const QuestionArea = styled.div`
-  width: 1500px;
+  width: 80%;
+  max-width: 1200px;
   height: 400px;
   display: flex;
   align-items: center;
@@ -25,18 +29,17 @@ const QuestionArea = styled.div`
   background-color: white;
   font-size: 25px;
   margin-top: 80px;
+  padding: 20px;
+  text-align: center;
 `;
 
 const AnswerBox = styled.input`
   margin-top: 20px;
-  width: 800px;
+  width: 80%;
+  max-width: 1000px;
   height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-size: 25px;
   text-align: center;
-
   border: 1px solid gray;
   transition: border-color 0.3s;
 
@@ -47,51 +50,48 @@ const AnswerBox = styled.input`
 `;
 
 const BtnArea = styled.div`
-  width: 500px;
-  height: auto;
+  width: 80%;
+  max-width: 1000px;
+  margin-top: 20px;
   display: flex;
   align-items: center;
   justify-content: space-around;
 `;
 
 const CorrectBtn = styled.button`
-  margin-top: 20px;
   width: 200px;
   height: 50px;
   border-radius: 15px;
   cursor: pointer;
-  font-size: 30px;
+  font-size: 20px;
   background-color: lightsalmon;
 `;
 
 const App = () => {
   const [answer, setAnswer] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (e.key === "Enter" && e.shiftKey) {
-        e.preventDefault(); // 쉬프트 + 엔터의 기본 동작 방지
-        clickPassBtn();
-      }
-    };
-
-    // 이벤트 리스너 등록
-    document.addEventListener("keydown", handleKeyPress);
-
-    // 컴포넌트가 언마운트될 때 이벤트 리스너 제거
-    return () => {
-      document.removeEventListener("keydown", handleKeyPress);
-    };
-  }, [currentIndex]); // currentIndex가 변경될 때마다 useEffect 실행
+  const [isMuted, setIsMuted] = useState(false);
 
   const handleInput = (e) => {
     setAnswer(e.target.value.toLowerCase());
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      if (e.shiftKey) {
+        clickPassBtn();
+      } else {
+        clickCorrectBtn();
+      }
+    }
+  };
+
   const clickCorrectBtn = () => {
-    const trimmedAnswer = answer.replace(/\s/g, "");
-    const currentAnswer = Array.isArray(sogong[currentIndex].answer) ? sogong[currentIndex].answer.map(word => word.replace(/\s/g, "").toLowerCase()) : [sogong[currentIndex].answer.replace(/\s/g, "").toLowerCase()];
+    const trimmedAnswer = answer.trim().toLowerCase();
+    const currentAnswer = Array.isArray(sogong[currentIndex].answer)
+      ? sogong[currentIndex].answer.map(word => word.trim().toLowerCase())
+      : [sogong[currentIndex].answer.trim().toLowerCase()];
+
     if (currentIndex === sogong.length - 1) {
       alert("마지막 문제입니다");
     } else if (currentAnswer.includes(trimmedAnswer)) {
@@ -108,18 +108,35 @@ const App = () => {
     } else {
       setCurrentIndex(currentIndex + 1);
       setAnswer('');
-      alert("정답은:" + sogong[currentIndex].answer + "입니다");
+      alert(`정답은: ${sogong[currentIndex].answer} 입니다`);
     }
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    const audioElement = document.getElementById("backgroundMusic");
+    audioElement.muted = !audioElement.muted;
   };
 
   return (
     <Container>
-      <h1 style={{color:"5red"}}>"enter 누르면 정답 shift + enter 누르면 패스"</h1>
-      <QuestionArea><h1>{sogong[currentIndex].question}</h1></QuestionArea>
-      <AnswerBox placeholder="정답을 입력하세요" value={answer} onChange={handleInput}/>
+      <audio autoPlay loop id="backgroundMusic">
+        <source src={backgroundMusic} type="audio/mp3" />
+      </audio>
+      <Title>"Enter 키를 누르면 정답, Shift + Enter 키를 누르면 패스"</Title>
+      <QuestionArea>{sogong[currentIndex].question}</QuestionArea>
+      <AnswerBox
+        placeholder="정답을 입력하세요"
+        value={answer}
+        onChange={handleInput}
+        onKeyPress={handleKeyPress}
+      />
       <BtnArea>
         <CorrectBtn onClick={clickCorrectBtn}>정답</CorrectBtn>
         <CorrectBtn onClick={clickPassBtn}>패스</CorrectBtn>
+        <CorrectBtn onClick={toggleMute} style={{ backgroundColor: "lightblue" }}>
+          {isMuted ? "음소거 해제" : "음소거"}
+        </CorrectBtn>
       </BtnArea>
     </Container>
   );
