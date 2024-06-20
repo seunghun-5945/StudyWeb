@@ -91,10 +91,13 @@ const App = () => {
     const currentAnswer = Array.isArray(sogong[currentIndex].answer)
       ? sogong[currentIndex].answer.map(word => word.trim().toLowerCase())
       : [sogong[currentIndex].answer.trim().toLowerCase()];
-
+  
+    const sortedTrimmedAnswer = trimmedAnswer.split(' ').sort().join(' ');
+    const sortedCurrentAnswer = currentAnswer.map(ans => ans.split(' ').sort().join(' '));
+  
     if (currentIndex === sogong.length - 1) {
       alert("마지막 문제입니다");
-    } else if (currentAnswer.includes(trimmedAnswer)) {
+    } else if (sortedCurrentAnswer.some(ans => ans === sortedTrimmedAnswer)) {
       setCurrentIndex(currentIndex + 1);
       setAnswer('');
     } else {
